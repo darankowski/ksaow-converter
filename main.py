@@ -3,13 +3,13 @@
 import sys
 import datetime
 import codecs
-import json
 import webbrowser
 import xmltodict
 import xml.etree.ElementTree as ET
 import tkinter as tk
 from tkinter import filedialog
 
+CLCONST = datetime.date(1800, 12, 28)
 default_path = "C:/Eksport z WFMAG/"
 
 print("""
@@ -24,11 +24,13 @@ W drugim podaj nazwę pliku docelowego.
 root = tk.Tk()
 root.withdraw()
 
-file_path = filedialog.askopenfilename(title="Plik do wczytania", filetypes=[("XML", ".xml")], initialdir=default_path)
+file_path = filedialog.askopenfilename(title="Plik do wczytania", filetypes=[("XML", ".xml")],
+                                       initialdir=default_path)
 if not file_path:
     print("Nie wskazano pliku źródłowego, kończę pracę.")
     exit(1)
-target_path = filedialog.asksaveasfilename(title="Plik do zapisania", defaultextension="xml", filetypes=[("XML", ".xml")], initialdir=default_path)
+target_path = filedialog.asksaveasfilename(title="Plik do zapisania", defaultextension="xml",
+                                           filetypes=[("XML", ".xml")], initialdir=default_path)
 if not target_path:
     print("Nie podano nazwy pliku docelowego, kończę pracę.")
     exit(1)
@@ -52,11 +54,11 @@ root = ET.Element("MAGIK_EKSPORT")
 
 # Podstawowa struktura
 
-info        = ET.SubElement(root, "INFO_EKSPORTU")
-dokumenty   = ET.SubElement(root, "DOKUMENTY")
+info = ET.SubElement(root, "INFO_EKSPORTU")
+dokumenty = ET.SubElement(root, "DOKUMENTY")
 kontrahenci = ET.SubElement(root, "KARTOTEKA_KONTRAHENTOW")
-pracownicy  = ET.SubElement(root, "KARTOTEKA_PRACOWNIKOW")
-artykuly    = ET.SubElement(root, "KARTOTEKA_ARTYKULOW")
+pracownicy = ET.SubElement(root, "KARTOTEKA_PRACOWNIKOW")
+artykuly = ET.SubElement(root, "KARTOTEKA_ARTYKULOW")
 
 dostawcy = {}
 dostawcy_nazwa = {}
@@ -77,7 +79,7 @@ print("Kontrahenci (tylko dostawcy):")
 
 for apteka_k in apteka['dokumenty']['kartoteki']['kartoteka']:
     if 'DOST' in apteka_k['wewn-ident']:
-        nr_dost+=1
+        nr_dost += 1
         kontr = ET.SubElement(kontrahenci, "KONTRAHENT")
         ET.SubElement(kontr, "ID_KONTRAHENTA").text = apteka_k['wewn-ident'][4:]
         ET.SubElement(kontr, "KOD_KONTRAHENTA").text = apteka_k['wewn-ident'][4:]
@@ -94,9 +96,12 @@ for apteka_k in apteka['dokumenty']['kartoteki']['kartoteka']:
         ET.SubElement(kontr, "ULICA_LOKAL").text = apteka_k['adres-telefon']['adres']
         ET.SubElement(kontr, "NAZWA_PELNA").text = apteka_k['nazwa1'][0:200]
         if 'kod-pocztowy' in apteka_k['adres-telefon']:
-            ET.SubElement(kontr, "ADRES").text = "%s %s, %s" % (apteka_k['adres-telefon']['kod-pocztowy'], apteka_k['adres-telefon']['miejscowosc'], apteka_k['adres-telefon']['adres'])
+            ET.SubElement(kontr, "ADRES").text = "%s %s, %s" % (apteka_k['adres-telefon']['kod-pocztowy'],
+                                                                apteka_k['adres-telefon']['miejscowosc'],
+                                                                apteka_k['adres-telefon']['adres'])
         else:
-            ET.SubElement(kontr, "ADRES").text = " %s, %s" % (apteka_k['adres-telefon']['miejscowosc'], apteka_k['adres-telefon']['adres'])
+            ET.SubElement(kontr, "ADRES").text = " %s, %s" % (apteka_k['adres-telefon']['miejscowosc'],
+                                                              apteka_k['adres-telefon']['adres'])
         ET.SubElement(kontr, "SYMBOL_KRAJU_KONTRAHENTA").text = "PL"
         ET.SubElement(kontr, "NAZWA_KLASYFIKACJI").text = "Ogólna"
         ET.SubElement(kontr, "NAZWA_GRUPY").text = "Ogólna"
@@ -111,23 +116,25 @@ for apteka_k in apteka['dokumenty']['kartoteki']['kartoteka']:
         dostawcy[apteka_k['@lp']] = apteka_k['wewn-ident'][4:]
         dostawcy_nazwa[apteka_k['@lp']] = apteka_k['nazwa1']
 
-        print("%3d: ID: %-6s NIP: %-15s %-40s" % (nr_dost, apteka_k['wewn-ident'][4:], apteka_k['nip'], apteka_k['nazwa1']))
+        print("%3d: ID: %-6s NIP: %-15s %-40s" % (nr_dost, apteka_k['wewn-ident'][4:], apteka_k['nip'],
+                                                  apteka_k['nazwa1']))
 
-#        print("%d, %d, %s, %s" % (int(apteka_k['@lp']), int(apteka_k['wewn-ident'][4:]), apteka_k['nazwa1'], apteka_k['nip']))
 
 print()
 print("Skonczylem - teraz dokumenty:")
 print()
 # Dokumenty
 
-print("Lp. | Dokument                  | Data wyst. | Data wpł.  | Korekta | Dostawca                                 | Wartość netto | Wartość brutto")
-print("----+---------------------------+------------+------------+---------+------------------------------------------+---------------+---------------")
+print("%-3s | %-25s | %-10s | %-10s | %-7s | %-40s | %-14s | %-14s" % ('Lp.', 'Dokument', 'Data wyst.',
+                                                                       'Data wpł', 'Korekta', 'Dostawca',
+                                                                       'Wartość netto', 'Wartość brutto'))
+print('-' * 146)
+
 how_many = 0
 
 for apteka_k in apteka['dokumenty']['dokument']:
-#    print(apteka_k['@lp'])
     if apteka_k['naglowek']['rodzaj-dokumentu'] == 'Z':   # chcemy tylko faktury zakupu
-        how_many+=1
+        how_many += 1
         dokument = ET.SubElement(dokumenty, "DOKUMENT")
         naglowek = ET.SubElement(dokument, "NAGLOWEK_DOKUMENTU")
         vat = ET.SubElement(dokument, "VAT")
@@ -218,13 +225,14 @@ for apteka_k in apteka['dokumenty']['dokument']:
         ET.SubElement(wartosci_naglowka, "KURS_WALUTY_PZ").text = ".00000000"
 
         # wypelnij daty
-        ET.SubElement(daty, "DATA_WYSTAWIENIA").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-wystawienia']) - datetime.date(1800,12,28)).days)
-#        ET.SubElement(daty, "DATA_WYSTAWIENIA").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - datetime.date(1800,12,28)).days)
-#        ET.SubElement(daty, "DATA_SPRZEDAZY").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-wystawienia']) - datetime.date(1800,12,28)).days)
-        ET.SubElement(daty, "DATA_SPRZEDAZY").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - datetime.date(1800,12,28)).days)
-        ET.SubElement(daty, "DATA_WPLYWU").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - datetime.date(1800,12,28)).days)
-        ET.SubElement(daty, "TERMIN_PLATNOSCI").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['termin-platnosci']['data']) - datetime.date(1800,12,28)).days)
 
+        data_wyst_clar = (datetime.date.fromisoformat(apteka_k['naglowek']['data-wystawienia']) - CLCONST).days
+        data_otrz_clar = (datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - CLCONST).days
+        term_plat_clar = (datetime.date.fromisoformat(apteka_k['naglowek']['termin-platnosci']['data']) - CLCONST).days
+        ET.SubElement(daty, "DATA_WYSTAWIENIA").text = str(data_wyst_clar)
+        ET.SubElement(daty, "DATA_SPRZEDAZY").text = str(data_otrz_clar)
+        ET.SubElement(daty, "DATA_WPLYWU").text = str(data_otrz_clar)
+        ET.SubElement(daty, "TERMIN_PLATNOSCI").text = str(term_plat_clar)
 
         # kwoty VAT
         apt_v_netto = {}
@@ -253,14 +261,18 @@ for apteka_k in apteka['dokumenty']['dokument']:
             ET.SubElement(stawka, "VAT_WALUTA").text = ".0000"
             ET.SubElement(stawka, "KW_NABYCIA").text = ".00"
             ET.SubElement(stawka, "MARZA").text = "0"
-            ET.SubElement(stawka, "DATA_VAT").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - datetime.date(1800,12,28)).days)
-            ET.SubElement(stawka, "DATA_KURSU").text = str((datetime.date.fromisoformat(apteka_k['naglowek']['data-otrzymania']) - datetime.date(1800,12,28)).days)
+            ET.SubElement(stawka, "DATA_VAT").text = str(data_otrz_clar)
+            ET.SubElement(stawka, "DATA_KURSU").text = str(data_otrz_clar)
             ET.SubElement(stawka, "KURS_VAT").text = "1.00000000"
             ET.SubElement(stawka, "ODWROTNY").text = "0"
             ET.SubElement(stawka, "ODWROTNY_TOWAR_USLUGA")
 
-        print("%3d | %-25s | %-10s | %-10s | %-7s | %-40s | %13.2f | %13.2f" % (how_many, apteka_k['naglowek']['nr-dokumentu'], apteka_k['naglowek']['data-wystawienia'], apteka_k['naglowek']['data-otrzymania'],
-                                                                            "TAK" if apteka_k['naglowek']['czy-korekta'] == "true" else "", dostawcy_nazwa[apteka_k['naglowek']['kontrahent']], float(netto_zakup.text), float(brutto_zakup.text)))
+        print("%3d | %-25s | %-10s | %-10s | %-7s | %-40s | %14.2f | %14.2f" %
+              (how_many, apteka_k['naglowek']['nr-dokumentu'], apteka_k['naglowek']['data-wystawienia'],
+               apteka_k['naglowek']['data-otrzymania'],
+               "TAK" if apteka_k['naglowek']['czy-korekta'] == "true" else "",
+               dostawcy_nazwa[apteka_k['naglowek']['kontrahent']],
+               float(netto_zakup.text), float(brutto_zakup.text)))
 
 
 #            print(apteka_k['podsumowanie-fk'])
