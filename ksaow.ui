@@ -1,0 +1,687 @@
+<?xml version='1.0' encoding='utf-8'?>
+<interface version="1.1">
+  <object class="tk.Toplevel" id="mainwindow">
+    <property name="height">200</property>
+    <property name="minsize">800|600</property>
+    <property name="width">200</property>
+    <child>
+      <object class="ttk.Frame" id="top_main_window_frame">
+        <property name="height">200</property>
+        <property name="width">200</property>
+        <layout manager="grid">
+          <property name="column">0</property>
+          <property name="propagate">True</property>
+          <property name="row">0</property>
+          <property name="sticky">nsew</property>
+          <property type="col" id="0" name="weight">1</property>
+          <property type="row" id="0" name="weight">1</property>
+        </layout>
+        <child>
+          <object class="ttk.Frame" id="header_frame">
+            <property name="height">200</property>
+            <property name="width">200</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="propagate">True</property>
+              <property name="row">0</property>
+              <property name="sticky">nsew</property>
+              <property type="col" id="0" name="weight">1</property>
+            </layout>
+            <child>
+              <object class="ttk.Label" id="label22">
+                <property name="font">{Arial} 16 {bold}</property>
+                <property name="padding">10</property>
+                <property name="text" translatable="yes">Konwerter plików z apteki</property>
+                <layout manager="pack">
+                  <property name="propagate">True</property>
+                  <property name="side">top</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Label" id="label1">
+                <property name="text" translatable="yes">Program tylko wczytuje dokumenty zakupów</property>
+                <layout manager="pack">
+                  <property name="propagate">True</property>
+                  <property name="side">top</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Frame" id="buttons_settings_frame">
+            <property name="height">200</property>
+            <property name="padding">10</property>
+            <property name="width">200</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="propagate">True</property>
+              <property name="row">1</property>
+              <property name="sticky">nsew</property>
+              <property type="col" id="0" name="weight">1</property>
+            </layout>
+            <child>
+              <object class="ttk.Frame" id="buttons_frame">
+                <property name="height">200</property>
+                <property name="padding">5</property>
+                <property name="width">200</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="propagate">True</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                  <property type="col" id="0" name="weight">2</property>
+                </layout>
+                <child>
+                  <object class="ttk.Button" id="button1">
+                    <property name="command" type="command" cbtype="simple">get_src_file</property>
+                    <property name="text" translatable="yes">Otwórz...</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">5</property>
+                      <property name="pady">5</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">nsew</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Button" id="btn_save_as">
+                    <property name="command" type="command" cbtype="simple">get_dest_file</property>
+                    <property name="state">disabled</property>
+                    <property name="text" translatable="yes">Zapisz do...</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">5</property>
+                      <property name="pady">5</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">nsew</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Button" id="btn_save">
+                    <property name="command" type="command" cbtype="simple">save_file</property>
+                    <property name="state">disabled</property>
+                    <property name="text" translatable="yes">Zapisz</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">5</property>
+                      <property name="pady">5</property>
+                      <property name="propagate">True</property>
+                      <property name="row">2</property>
+                      <property name="sticky">nsew</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Button" id="button4">
+                    <property name="command" type="command" cbtype="simple">close_app</property>
+                    <property name="text" translatable="yes">Wyjście</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">5</property>
+                      <property name="pady">5</property>
+                      <property name="propagate">True</property>
+                      <property name="row">3</property>
+                      <property name="sticky">nsew</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label_src_path">
+                    <property name="textvariable">string:src_path</property>
+                    <property name="width">60</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="padx">10</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label_dest_path">
+                    <property name="textvariable">string:dest_path</property>
+                    <property name="width">60</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="padx">10</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Labelframe" id="settings_frame">
+                <property name="height">200</property>
+                <property name="padding">5</property>
+                <property name="text" translatable="yes">Ustawienia importu</property>
+                <property name="width">200</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="propagate">True</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                  <property type="col" id="1" name="weight">1</property>
+                </layout>
+                <child>
+                  <object class="ttk.Checkbutton" id="chk_purchase">
+                    <property name="command" type="command" cbtype="simple">update_docs_view</property>
+                    <property name="text" translatable="yes">Zakup - faktury</property>
+                    <property name="variable">boolean:cfg_purchase_invoice</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Checkbutton" id="chk_purchase_corr">
+                    <property name="command" type="command" cbtype="simple">update_docs_view</property>
+                    <property name="text" translatable="yes">Zakup - korekty</property>
+                    <property name="variable">boolean:cfg_purchase_invoice_corr</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Labelframe" id="summary_frame">
+            <property name="height">200</property>
+            <property name="text" translatable="yes">Podsumowanie</property>
+            <property name="width">200</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="ipadx">0</property>
+              <property name="ipady">0</property>
+              <property name="padx">10</property>
+              <property name="pady">10</property>
+              <property name="propagate">True</property>
+              <property name="row">3</property>
+              <property name="sticky">nsew</property>
+              <property type="col" id="0" name="weight">1</property>
+            </layout>
+            <child>
+              <object class="ttk.Frame" id="frame8">
+                <property name="height">200</property>
+                <property name="width">200</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="propagate">True</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                  <property type="col" id="0" name="weight">1</property>
+                </layout>
+                <child>
+                  <object class="ttk.Label" id="label4">
+                    <property name="text" translatable="yes">Wczytano dokumentów: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label5">
+                    <property name="text" translatable="yes">Faktury zakupu: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label6">
+                    <property name="text" translatable="yes">Korekty zakupu: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">2</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label7">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">int:lbl_number_all_docs</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label8">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">int:lbl_number_purchase_docs</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label9">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">int:lbl_number_corr_docs</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">2</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Frame" id="frame10">
+                <property name="height">200</property>
+                <property name="width">200</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="propagate">True</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                  <property type="col" id="1" name="weight">1</property>
+                </layout>
+                <child>
+                  <object class="ttk.Label" id="label10">
+                    <property name="text" translatable="yes">Wczytano kontrahentów: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label13">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">int:lbl_number_contractors</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">w</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Separator" id="separator1">
+                <property name="orient">horizontal</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="columnspan">2</property>
+                  <property name="padx">5</property>
+                  <property name="pady">5</property>
+                  <property name="propagate">True</property>
+                  <property name="row">1</property>
+                  <property name="sticky">ew</property>
+                  <property type="col" id="0" name="weight">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Frame" id="frame11">
+                <property name="height">200</property>
+                <property name="width">200</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="columnspan">2</property>
+                  <property name="propagate">True</property>
+                  <property name="row">2</property>
+                  <property type="col" id="0" name="weight">1</property>
+                </layout>
+                <child>
+                  <object class="ttk.Label" id="label16">
+                    <property name="text" translatable="yes">Wartość netto: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label17">
+                    <property name="text" translatable="yes">Wartość VAT: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label18">
+                    <property name="text" translatable="yes">Wartość brutto: </property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="propagate">True</property>
+                      <property name="row">2</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label19">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">string:lbl_sum_netto</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">0</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label20">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">string:lbl_sum_vat</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">1</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="ttk.Label" id="label21">
+                    <property name="text" translatable="yes">0</property>
+                    <property name="textvariable">string:lbl_sum_brutto</property>
+                    <layout manager="grid">
+                      <property name="column">1</property>
+                      <property name="propagate">True</property>
+                      <property name="row">2</property>
+                      <property name="sticky">e</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="ttk.Frame" id="bottom_top_window">
+        <property name="height">0</property>
+        <property name="padding">5</property>
+        <property name="width">0</property>
+        <layout manager="grid">
+          <property name="column">0</property>
+          <property name="propagate">True</property>
+          <property name="row">1</property>
+          <property name="sticky">nsew</property>
+          <property type="col" id="0" name="weight">1</property>
+          <property type="row" id="1" name="pad">10</property>
+          <property type="row" id="1" name="weight">1</property>
+        </layout>
+        <child>
+          <object class="ttk.Notebook" id="tabs_notebook">
+            <property name="height">200</property>
+            <property name="width">200</property>
+            <layout manager="pack">
+              <property name="anchor">n</property>
+              <property name="expand">true</property>
+              <property name="fill">both</property>
+              <property name="propagate">True</property>
+              <property name="side">bottom</property>
+            </layout>
+            <child>
+              <object class="ttk.Notebook.Tab" id="docs_tab">
+                <property name="sticky">nsew</property>
+                <property name="text" translatable="yes">Dokumenty</property>
+                <child>
+                  <object class="pygubu.builder.widgets.scrollbarhelper" id="scrollbarhelper4">
+                    <property name="scrolltype">both</property>
+                    <property name="usemousewheel">false</property>
+                    <layout manager="pack">
+                      <property name="expand">true</property>
+                      <property name="fill">both</property>
+                      <property name="propagate">True</property>
+                      <property name="side">top</property>
+                    </layout>
+                    <child>
+                      <object class="ttk.Treeview" id="treeview_docs">
+                        <property name="selectmode">extended</property>
+                        <layout manager="pack">
+                          <property name="expand">true</property>
+                          <property name="fill">both</property>
+                          <property name="propagate">True</property>
+                          <property name="side">top</property>
+                        </layout>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="id_docs">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">ID</property>
+                            <property name="tree_column">true</property>
+                            <property name="visible">true</property>
+                            <property name="width">20</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column10">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Korekta?</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">50</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="data_column">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Data wyst.</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="doc_no">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Dokument</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">80</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column8">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Kontrahent</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">200</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column12">
+                            <property name="column_anchor">center</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Stawka</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">30</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column9">
+                            <property name="column_anchor">e</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Wartość netto</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column13">
+                            <property name="column_anchor">e</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Kwota VAT</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column11">
+                            <property name="column_anchor">e</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Wartość brutto</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">100</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Notebook.Tab" id="contractors_tab">
+                <property name="sticky">nsew</property>
+                <property name="text" translatable="yes">Kontrahenci</property>
+                <child>
+                  <object class="pygubu.builder.widgets.scrollbarhelper" id="scrollbarhelper5">
+                    <property name="scrolltype">both</property>
+                    <property name="usemousewheel">false</property>
+                    <layout manager="pack">
+                      <property name="propagate">True</property>
+                      <property name="side">top</property>
+                    </layout>
+                    <child>
+                      <object class="ttk.Treeview" id="treeview_contractors">
+                        <property name="selectmode">browse</property>
+                        <layout manager="pack" />
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column1">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">30</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Lp</property>
+                            <property name="tree_column">true</property>
+                            <property name="visible">true</property>
+                            <property name="width">30</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="ID">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">30</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">ID</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">30</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column3">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">50</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Nazwa</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">250</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column4">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">50</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">NIP</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="ttk.Treeview.Column" id="column5">
+                            <property name="column_anchor">w</property>
+                            <property name="heading_anchor">w</property>
+                            <property name="minwidth">20</property>
+                            <property name="stretch">true</property>
+                            <property name="text" translatable="yes">Adres</property>
+                            <property name="tree_column">false</property>
+                            <property name="visible">true</property>
+                            <property name="width">200</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
