@@ -12,9 +12,12 @@ import xml.etree.ElementTree as ET
 import pygubu
 from tkinter import filedialog, messagebox
 
-PROJECT_PATH = os.path.dirname(__file__)
-PROJECT_UI = os.path.join(PROJECT_PATH, "ksaow.ui")
+try:
+    PROJECT_PATH = sys._MEIPASS    #W/A for pyinstaller
+except:
+    PROJECT_PATH = os.path.dirname(__file__)
 
+PROJECT_UI = os.path.join(PROJECT_PATH, "ksaow.ui")
 DEFAULT_PATH = "C:/Eksport z WFMAG/"
 FILE_TYPES = [("Plik XML", ".xml")]
 
@@ -36,7 +39,7 @@ class KsaowApp:
         self.src_import_time = ''
 
         self.builder = builder = pygubu.Builder()
-        builder.add_resource_path(PROJECT_PATH)
+#        builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
         self.mainwindow = builder.get_object('mainwindow')
         builder.connect_callbacks(self)
