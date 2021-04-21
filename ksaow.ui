@@ -4,6 +4,7 @@
     <property name="height">200</property>
     <property name="minsize">800|600</property>
     <property name="width">200</property>
+    <property name="title">Konwerter plików z apteki</property>
     <child>
       <object class="ttk.Frame" id="top_main_window_frame">
         <property name="height">200</property>
@@ -395,7 +396,7 @@
                 </child>
                 <child>
                   <object class="ttk.Label" id="label19">
-                    <property name="text" translatable="yes">0</property>
+                    <property name="text" translatable="yes">0.00</property>
                     <property name="textvariable">string:lbl_sum_netto</property>
                     <layout manager="grid">
                       <property name="column">1</property>
@@ -407,7 +408,7 @@
                 </child>
                 <child>
                   <object class="ttk.Label" id="label20">
-                    <property name="text" translatable="yes">0</property>
+                    <property name="text" translatable="yes">0.00</property>
                     <property name="textvariable">string:lbl_sum_vat</property>
                     <layout manager="grid">
                       <property name="column">1</property>
@@ -419,7 +420,7 @@
                 </child>
                 <child>
                   <object class="ttk.Label" id="label21">
-                    <property name="text" translatable="yes">0</property>
+                    <property name="text" translatable="yes">0.00</property>
                     <property name="textvariable">string:lbl_sum_brutto</property>
                     <layout manager="grid">
                       <property name="column">1</property>

@@ -1,31 +1,74 @@
-#!/usr/bin/env python3
-
 import os
 import sys
-import random
 import datetime
-import codecs
 import tkinter as tk
+from tkinter import filedialog, messagebox
 import decimal
-import xmltodict
 import xml.etree.ElementTree as ET
 import pygubu
-from tkinter import filedialog, messagebox
+import configparser
 
-try:
-    PROJECT_PATH = sys._MEIPASS    #W/A for pyinstaller
-except:
-    PROJECT_PATH = os.path.dirname(__file__)
+PROJECT_PATH = os.path.abspath(getattr(sys, '_MEIPASS', os.path.dirname(__file__)))
+PROJECT_UI = os.path.join(PROJECT_PATH, 'ksaow.ui')
+PROJECT_APP_NAME = 'KsaowApp'
 
-PROJECT_UI = os.path.join(PROJECT_PATH, "ksaow.ui")
-DEFAULT_PATH = "C:/Eksport z WFMAG/"
+DEFAULT_READ_PATH = ''
+DEFAULT_WRITE_PATH = ''
+
 FILE_TYPES = [("Plik XML", ".xml")]
+DECIMAL_ZERO = decimal.Decimal(0).quantize(decimal.Decimal('0.0001'))
 
 CLCONST = datetime.date(1800, 12, 28)
 
 
+def read_cfg():
+    global DEFAULT_READ_PATH
+    global DEFAULT_WRITE_PATH
+
+    cfg_dir = os.path.expandvars('$APPDATA/Python'+PROJECT_APP_NAME)
+    cfg_file = os.path.join(cfg_dir, 'config.ini')
+    cfg = configparser.ConfigParser()
+    if not os.path.isdir(cfg_dir):
+        os.mkdir(cfg_dir)
+    if os.path.isfile(cfg_file):
+        cfg.read(cfg_file)
+    else:
+        # default configuration
+        cfg['default'] = {'default_read_path': '.',
+                          'default_write_path': '.'}
+
+    DEFAULT_READ_PATH = cfg['default']['default_read_path']
+    DEFAULT_WRITE_PATH = cfg['default']['default_write_path']
+
+
+def save_cfg():
+    global DEFAULT_READ_PATH
+    global DEFAULT_WRITE_PATH
+
+    cfg_dir = os.path.expandvars('$APPDATA/Python'+PROJECT_APP_NAME)
+    cfg_file = os.path.join(cfg_dir, 'config.ini')
+    cfg = configparser.ConfigParser()
+    if not os.path.isdir(cfg_dir):
+        os.mkdir(cfg_dir)
+
+    cfg['default'] = {'default_read_path': DEFAULT_READ_PATH,
+                      'default_write_path': DEFAULT_WRITE_PATH}
+    with open(cfg_file, 'w') as configfile:
+        cfg.write(configfile)
+
+
 class KsaowVars(object):
-    pass
+    lbl_number_corr_docs = None
+    lbl_number_purchase_docs = None
+    lbl_number_all_docs = None
+    lbl_number_contractors = None
+    lbl_sum_brutto = None
+    lbl_sum_vat = None
+    lbl_sum_netto = None
+    dest_path = None
+    src_path = None
+    cfg_purchase_invoice_corr = None
+    cfg_purchase_invoice = None
 
 
 class KsaowApp:
@@ -39,42 +82,45 @@ class KsaowApp:
         self.src_import_time = ''
 
         self.builder = builder = pygubu.Builder()
-#        builder.add_resource_path(PROJECT_PATH)
+        builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
         self.mainwindow = builder.get_object('mainwindow')
         builder.connect_callbacks(self)
-        self.init_default_cfg()
-
-    def init_default_cfg(self):
-        self.builder.import_variables(KsaowVars)
-
-        KsaowVars.cfg_purchase_invoice.set(True)
-        KsaowVars.cfg_purchase_invoice_corr.set(True)
 
         self.btn_save_as = self.builder.get_object('btn_save_as')
         self.btn_save = self.builder.get_object('btn_save')
         self.treeview_contractors = self.builder.get_object('treeview_contractors')
         self.treeview_docs = self.builder.get_object('treeview_docs')
 
+        self.builder.import_variables(KsaowVars)
+
+        KsaowVars.cfg_purchase_invoice.set(True)
+        KsaowVars.cfg_purchase_invoice_corr.set(True)
+
     def get_src_file(self):
+        global DEFAULT_READ_PATH
         src_filename = filedialog.askopenfilename(title="Plik do wczytania", filetypes=FILE_TYPES,
-                                                  initialdir=DEFAULT_PATH)
+                                                  initialdir=DEFAULT_READ_PATH)
         if src_filename:
             KsaowVars.src_path.set(src_filename)
+            DEFAULT_READ_PATH = os.path.dirname(src_filename)
             try:
                 self.parse_file(src_filename)
                 self.btn_save_as['state'] = tk.NORMAL
             except:
-                messagebox.showwarning('Błąd!', 'Otworzenie pliku {} nie powiodło się. Upewnij się, czy plik jest na pewno w dobrym formacie'.format(src_filename))
+                messagebox.showwarning('Błąd!', 'Otworzenie pliku {} nie powiodło się. ' +
+                                       'Upewnij się, czy plik jest na pewno w dobrym formacie'.format(src_filename))
                 self.btn_save_as['state'] = tk.DISABLED
                 self.btn_save['state'] = tk.DISABLED
 
     def get_dest_file(self):
+        global DEFAULT_WRITE_PATH
         dest_filename = filedialog.asksaveasfilename(title="Plik do zapisania", defaultextension="xml",
                                                      filetypes=FILE_TYPES,
-                                                     initialdir=DEFAULT_PATH)
+                                                     initialdir=DEFAULT_WRITE_PATH)
         if dest_filename:
             KsaowVars.dest_path.set(dest_filename)
+            DEFAULT_WRITE_PATH = os.path.dirname(dest_filename)
             self.btn_save['state'] = tk.NORMAL
 
     def close_app(self):
@@ -85,11 +131,11 @@ class KsaowApp:
 
         self.treeview_contractors.delete(*self.treeview_contractors.get_children())
 
-        for id, entry in self.contractors.items():
-            label = '{}'.format(id)
+        for idx, entry in self.contractors.items():
+            label = '{}'.format(idx)
             column_data = (entry['int_id'], entry['name'], entry['nip'],
                            '{} {}, {}'.format(entry['zip'], entry['city'], entry['address']))
-            itemid = self.treeview_contractors.insert('', tk.END, text=label, values=column_data)
+            self.treeview_contractors.insert('', tk.END, text=label, values=column_data)
 
     def update_docs_view(self):
 
@@ -99,16 +145,18 @@ class KsaowApp:
 
         self.treeview_docs.delete(*self.treeview_docs.get_children())
 
-        for id, entry in self.documents.items():
+        for idx, entry in self.documents.items():
 
-            if KsaowVars.cfg_purchase_invoice.get() == False and entry['cor'] == False:
+            if KsaowVars.cfg_purchase_invoice.get() is False and entry['cor'] is False:
                 continue
-            if KsaowVars.cfg_purchase_invoice_corr.get() == False and entry['cor'] == True:
+            if KsaowVars.cfg_purchase_invoice_corr.get() is False and entry['cor'] is True:
                 continue
 
-            label = '{}'.format(id)
-            column_data = (entry['cor'], entry['date_issue'], entry['doc_no'], self.contractors[entry['id_ctr']]['name'], '',
-                           entry['sum_netto'].quantize(decimal.Decimal('0.01')), '',
+            label = '{}'.format(idx)
+            column_data = (entry['cor'], entry['date_issue'], entry['doc_no'],
+                           self.contractors[entry['id_ctr']]['name'], '',
+                           entry['sum_netto'].quantize(decimal.Decimal('0.01')),
+                           entry['sum_vat'].quantize(decimal.Decimal('0.01')),
                            entry['sum_brutto'].quantize(decimal.Decimal('0.01')))
             tmp_sum['netto'] += entry['sum_netto']
             tmp_sum['brutto'] += entry['sum_brutto']
@@ -116,7 +164,8 @@ class KsaowApp:
             for id_vat, entry_vat in entry['vat'].items():
                 label = ''
                 column_data = ('', '', '', '', id_vat, entry_vat['netto'].quantize(decimal.Decimal('0.01')),
-                               entry_vat['vat'].quantize(decimal.Decimal('0.01')))
+                               entry_vat['vat'].quantize(decimal.Decimal('0.01')),
+                               entry_vat['brutto'].quantize(decimal.Decimal('0.01')))
                 self.treeview_docs.insert(itemid, tk.END, text=label, values=column_data)
                 tmp_sum['vat'] += entry_vat['vat']
         KsaowVars.lbl_sum_netto.set(tmp_sum['netto'].quantize(decimal.Decimal('0.01')))
@@ -132,38 +181,31 @@ class KsaowApp:
 
         # open file...
 
-        with codecs.open(filename, 'r', 'utf-8') as apteka_file:
-            apteka = xmltodict.parse(apteka_file.read())
+        tree = ET.parse(filename)
+        root = tree.getroot()
 
         # read basic info about program and time from file
 
-        self.src_program_name = apteka['dokumenty']['info']['symbol-systemu']
-        self.src_program_ver = apteka['dokumenty']['info']['nazwa-systemu']
-        self.src_import_time = apteka['dokumenty']['info']['data-czas-generacji']
+        self.src_program_name = root.find('./info/symbol-systemu').text
+        self.src_program_ver = root.find('./info/nazwa-systemu').text
+        self.src_import_time = root.find('./info/data-czas-generacji').text
 
         # read all suppliers from file and put it into dictionary
 
-        for apteka_ctr in apteka['dokumenty']['kartoteki']['kartoteka']:
-            if 'DOST' in apteka_ctr['wewn-ident']:
-                if 'kod-pocztowy' in apteka_ctr['adres-telefon']:
-                    zip = apteka_ctr['adres-telefon']['kod-pocztowy']
-                else:
-                    zip = ''
-                entry = {'int_id': apteka_ctr['wewn-ident'][4:],
-                         'name': apteka_ctr['nazwa1'],
-                         'nip': apteka_ctr['nip'],
-                         'zip': zip,
-                         'address': apteka_ctr['adres-telefon']['adres'],
-                         'city': apteka_ctr['adres-telefon']['miejscowosc']}
-                self.contractors[apteka_ctr['@lp']] = entry
-            elif 'PACA' in apteka_ctr['wewn-ident']:
+        for item in root.findall('./kartoteki/kartoteka'):
+            if 'DOST' not in item.find('wewn-ident').text:
                 continue
-            else:
-                print("Something new:")
-                print(apteka_ctr)
-
-        apteka_file.close()
-
+            idx = item.attrib['lp']
+            entry = {
+                'int_id': item.find('./wewn-ident').text[4:],
+                'name': item.find('./nazwa1').text,
+                'nip': item.find("./nip").text,
+                'zip': '' if item.find("./adres-telefon/kod-pocztowy") is None else item.find(
+                    "./adres-telefon/kod-pocztowy").text,
+                'city': item.find("./adres-telefon/miejscowosc").text,
+                'address': item.find("./adres-telefon/adres").text
+            }
+            self.contractors[idx] = entry
         KsaowVars.lbl_number_contractors.set(len(self.contractors))
 
         self.update_contractors_view()
@@ -172,65 +214,58 @@ class KsaowApp:
         tmp_cor_no = 0
         tmp_docs_no = 0
 
-        for apteka_docs in apteka['dokumenty']['dokument']:
-            if apteka_docs['naglowek']['rodzaj-dokumentu'] == 'Z':  # chcemy tylko faktury zakupu
-                if apteka_docs['naglowek']['czy-korekta'] == 'true':
-                    tmp_cor = True
-                    tmp_orig_doc_no = apteka_docs['naglowek-kor']['nr-dokumentu-kor']
-                    tmp_cor_no += 1
+        for item in root.findall('./dokument'):
+            if item.find('./naglowek/rodzaj-dokumentu').text != 'Z':
+                continue
+
+            if item.find('./naglowek/czy-korekta').text == 'true':
+                tmp_cor = True
+                tmp_orig_doc_no = item.find('./naglowek-kor/nr-dokumentu-kor').text
+                tmp_cor_no += 1
+            else:
+                tmp_cor = False
+                tmp_orig_doc_no = ''
+                tmp_docs_no += 1
+
+            tmp_vat = {}
+            for v_item in item.findall('./podsumowanie-fk/kwoty/kwota'):
+                if v_item.find('./stawka-vat') is not None:
+                    tmp_vat_id = v_item.find('./stawka-vat').text
                 else:
-                    tmp_cor = False
-                    tmp_orig_doc_no = ''
-                    tmp_docs_no += 1
+                    tmp_vat_id = 'SUM'
+                if tmp_vat_id not in tmp_vat:
+                    tmp_vat[tmp_vat_id] = {'netto': DECIMAL_ZERO, 'vat': DECIMAL_ZERO, 'brutto': DECIMAL_ZERO}
+                if 'kwd-netto-zakupu' in v_item.find('./symbol').text:
+                    tmp_vat[tmp_vat_id]['netto'] = decimal.Decimal(v_item.find('./wartosc').text)\
+                        .quantize(decimal.Decimal('0.0001'))
+                elif 'kwd-vat-zakupu' in v_item.find('./symbol').text:
+                    tmp_vat[tmp_vat_id]['vat'] = decimal.Decimal(v_item.find('./wartosc').text)\
+                        .quantize(decimal.Decimal('0.0001'))
+                elif 'kwd-brutto-zakupu' in v_item.find('./symbol').text:
+                    tmp_vat[tmp_vat_id]['brutto'] = decimal.Decimal(v_item.find('./wartosc').text)\
+                        .quantize(decimal.Decimal('0.0001'))
+                else:
+                    pass
 
-                tmp_vat = {}
-                tmp_summary = {}
+            entry = {'int_id': item.find('./naglowek/wewn-ident').text[4:],
+                     'full_id': item.find('./naglowek/wewn-ident').text,
+                     'doc_no': item.find('./naglowek/nr-dokumentu').text,
+                     'cor': tmp_cor,
+                     'orig_doc_no': tmp_orig_doc_no,
+                     'id_ctr': item.find('./naglowek/kontrahent').text,
+                     'id_payer': item.find('./naglowek/sprzedawca').text,
+                     'payment_type': item.find('./naglowek/forma-platnosci/symbol').text,
+                     'date_issue': item.find('./naglowek/data-wystawienia').text,
+                     'date_delivery': item.find('./naglowek/data-otrzymania').text,
+                     'date_due': item.find('./naglowek/termin-platnosci/data').text,
+                     'vat': tmp_vat,
+                     'sum_netto': tmp_vat['SUM']['netto'],
+                     'sum_vat': tmp_vat['SUM']['vat'],
+                     'sum_brutto': tmp_vat['SUM']['brutto']
+                     }
+            del entry['vat']['SUM']
 
-                for tmp_iter_vat in apteka_docs['podsumowanie-fk']['kwoty']['kwota']:
-                    if 'stawka-vat' in tmp_iter_vat:
-                        if 'kwd-netto-zakupu' in tmp_iter_vat['symbol']:
-                            if not tmp_iter_vat['stawka-vat'] in tmp_vat:
-                                tmp_vat[tmp_iter_vat['stawka-vat']] = {
-                                    'netto': decimal.Decimal(tmp_iter_vat['wartosc']).quantize(
-                                        decimal.Decimal('0.0001')),
-                                    'vat': decimal.Decimal(0).quantize(decimal.Decimal('0.0001'))}
-                            else:
-                                tmp_vat[tmp_iter_vat['stawka-vat']]['netto'] = decimal.Decimal(
-                                    tmp_iter_vat['wartosc']).quantize(decimal.Decimal('0.0001'))
-                        elif 'kwd-vat-zakupu' in tmp_iter_vat['symbol']:
-                            if not tmp_iter_vat['stawka-vat'] in tmp_vat:
-                                tmp_vat[tmp_iter_vat['stawka-vat']] = {
-                                    'netto': decimal.Decimal(0).quantize(decimal.Decimal('0.0001')),
-                                    'vat': decimal.Decimal(tmp_iter_vat['wartosc']).quantize(decimal.Decimal('0.0001'))}
-                            else:
-                                tmp_vat[tmp_iter_vat['stawka-vat']]['vat'] = decimal.Decimal(
-                                    tmp_iter_vat['wartosc']).quantize(decimal.Decimal('0.0001'))
-                    else:
-                        if 'kwd-netto-zakupu' in tmp_iter_vat['symbol']:
-                            tmp_summary['netto'] = decimal.Decimal(tmp_iter_vat['wartosc']).quantize(
-                                decimal.Decimal('0.0001'))
-                        elif 'kwd-brutto-zakupu' in tmp_iter_vat['symbol']:
-                            tmp_summary['brutto'] = decimal.Decimal(tmp_iter_vat['wartosc']).quantize(
-                                decimal.Decimal('0.0001'))
-
-                entry = {'int_id': apteka_docs['naglowek']['wewn-ident'][4:],
-                         'full_id': apteka_docs['naglowek']['wewn-ident'],
-                         'doc_no': apteka_docs['naglowek']['nr-dokumentu'],
-                         'cor': tmp_cor,
-                         'orig_doc_no': tmp_orig_doc_no,
-                         'id_ctr': apteka_docs['naglowek']['kontrahent'],
-                         'id_payer': apteka_docs['naglowek']['sprzedawca'],
-                         #                         'id_ctr': self.contractors[apteka_docs['naglowek']['kontrahent']]['int_id'],
-                         #                         'id_payer': self.contractors[apteka_docs['naglowek']['sprzedawca']]['int_id'],
-                         'payment_type': apteka_docs['naglowek']['forma-platnosci']['symbol'],
-                         'date_issue': apteka_docs['naglowek']['data-wystawienia'],
-                         'date_delivery': apteka_docs['naglowek']['data-otrzymania'],
-                         'date_due': apteka_docs['naglowek']['termin-platnosci']['data'],
-                         'vat': tmp_vat,
-                         'sum_netto': tmp_summary['netto'],
-                         'sum_brutto': tmp_summary['brutto']
-                         }
-                self.documents[apteka_docs['@lp']] = entry
+            self.documents[item.attrib['lp']] = entry
         KsaowVars.lbl_number_all_docs.set(len(self.documents))
         KsaowVars.lbl_number_purchase_docs.set(tmp_docs_no)
         KsaowVars.lbl_number_corr_docs.set(tmp_cor_no)
@@ -250,8 +285,8 @@ class KsaowApp:
         info = ET.SubElement(root, "INFO_EKSPORTU")
         dokumenty = ET.SubElement(root, "DOKUMENTY")
         kontrahenci = ET.SubElement(root, "KARTOTEKA_KONTRAHENTOW")
-        pracownicy = ET.SubElement(root, "KARTOTEKA_PRACOWNIKOW")
-        artykuly = ET.SubElement(root, "KARTOTEKA_ARTYKULOW")
+        ET.SubElement(root, "KARTOTEKA_PRACOWNIKOW")
+        ET.SubElement(root, "KARTOTEKA_ARTYKULOW")
 
         ET.SubElement(info, "WERSJA_MAGIKA").text = "4.2.0"
         ET.SubElement(info, "NAZWA_PROGRAMU").text = self.src_program_name
@@ -262,7 +297,7 @@ class KsaowApp:
 
         # Contractors
 
-        for id, entry in self.contractors.items():
+        for idx, entry in self.contractors.items():
             kontr = ET.SubElement(kontrahenci, "KONTRAHENT")
             ET.SubElement(kontr, "ID_KONTRAHENTA").text = entry['int_id']
             ET.SubElement(kontr, "KOD_KONTRAHENTA").text = entry['int_id']
@@ -287,10 +322,10 @@ class KsaowApp:
             ET.SubElement(kontr, "RAKS_KOD_KONTRAHENTA")
             ET.SubElement(kontr, "ID_KONTRAHENTA_JST").text = "0"
 
-        for id, entry in self.documents.items():
-            if KsaowVars.cfg_purchase_invoice.get() == False and entry['cor'] == False:
+        for idx, entry in self.documents.items():
+            if KsaowVars.cfg_purchase_invoice.get() is False and entry['cor'] is False:
                 continue
-            if KsaowVars.cfg_purchase_invoice_corr.get() == False and entry['cor'] == True:
+            if KsaowVars.cfg_purchase_invoice_corr.get() is False and entry['cor'] is True:
                 continue
             tmp_docs_no += 1
             dokument = ET.SubElement(dokumenty, "DOKUMENT")
@@ -299,7 +334,7 @@ class KsaowApp:
 
             ET.SubElement(naglowek, "RODZAJ_DOKUMENTU").text = "H"
             ET.SubElement(naglowek, "NUMER").text = entry['doc_no']
-            if entry['cor'] == True:
+            if entry['cor'] is True:
                 ET.SubElement(naglowek, "NR_DOK_ORYG").text = entry['orig_doc_no']
             else:
                 ET.SubElement(naglowek, "NR_DOK_ORYG")
@@ -315,7 +350,7 @@ class KsaowApp:
             ET.SubElement(naglowek, "SYMBOL_MAGAZYNU").text = "MG"
             ET.SubElement(naglowek, "ID_ROZRACHUNKU").text = "0"
             ET.SubElement(naglowek, "OBLICZANIE_WG_CEN").text = "Netto"
-            if entry['cor'] == True:
+            if entry['cor'] is True:
                 ET.SubElement(naglowek, "TYP_DOKUMENTU").text = "FZk"
             else:
                 ET.SubElement(naglowek, "TYP_DOKUMENTU").text = "FZ"
@@ -327,7 +362,7 @@ class KsaowApp:
             ET.SubElement(naglowek, "ID_RACHUNKU").text = "0"
             ET.SubElement(naglowek, "NUMER_RACHUNKU")
             ET.SubElement(naglowek, "TYP_PLATNIKA")
-            if entry['cor'] == True:
+            if entry['cor'] is True:
                 ET.SubElement(naglowek, "CZY_DOKUMENT_KOREKTY").text = "1"
             else:
                 ET.SubElement(naglowek, "CZY_DOKUMENT_KOREKTY").text = "0"
@@ -415,5 +450,7 @@ class KsaowApp:
 
 
 if __name__ == '__main__':
+    read_cfg()
     app = KsaowApp()
     app.run()
+    save_cfg()
