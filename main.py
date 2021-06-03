@@ -108,8 +108,8 @@ class KsaowApp:
                 self.parse_file(src_filename)
                 self.btn_save_as['state'] = tk.NORMAL
             except:
-                messagebox.showwarning('Błąd!', 'Otworzenie pliku {} nie powiodło się. ' +
-                                       'Upewnij się, czy plik jest na pewno w dobrym formacie'.format(src_filename))
+                messagebox.showwarning('Błąd!', 'Otworzenie pliku {} nie powiodło się. '.format(src_filename) +
+                                       'Upewnij się, czy plik jest na pewno w dobrym formacie')
                 self.btn_save_as['state'] = tk.DISABLED
                 self.btn_save['state'] = tk.DISABLED
 
@@ -202,8 +202,10 @@ class KsaowApp:
                 'nip': item.find("./nip").text,
                 'zip': '' if item.find("./adres-telefon/kod-pocztowy") is None else item.find(
                     "./adres-telefon/kod-pocztowy").text,
-                'city': item.find("./adres-telefon/miejscowosc").text,
-                'address': item.find("./adres-telefon/adres").text
+                'city': '' if item.find("./adres-telefon/miejscowosc") is None else item.find(
+                    "./adres-telefon/miejscowosc").text,
+                'address': '' if item.find("./adres-telefon/adres") is None else
+                                item.find("./adres-telefon/adres").text
             }
             self.contractors[idx] = entry
         KsaowVars.lbl_number_contractors.set(len(self.contractors))
