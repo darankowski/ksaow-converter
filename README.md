@@ -15,6 +15,6 @@ Co nie działa:
 * Program zdecydowanie nie jest idiotoodporny i wyłoży się przy każdej nowej rzeczy, którą napotka. Niestety nie
   dysponuję żadną większą ilością danych wejściowych, żeby być w stanie sprawdzić wszystkie możliwe przypadki
   
-<a href="https://www.buymeacoffee.com/dankowsk" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+<a href="https://www.buymeacoffee.com/dankowsk" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" height="41px" width="174px" ></a>
 
 
